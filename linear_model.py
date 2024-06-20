@@ -1,9 +1,6 @@
 import pandas as pd
 import numpy as np
 from pre_proccess_script import data_preprocess
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 # Preprocess the data
 dataFrame = data_preprocess(pd.read_csv('Dataset/train.csv'))
@@ -30,10 +27,10 @@ def predicted_y(weight, x, intercept):
 
 # Define gradients
 def dldw(x, y, y_predicted):
-    return (2 / len(y)) * np.dot(x.T, (y_predicted - y))
+    return (1 / len(y)) * np.dot(x.T, (y_predicted - y))
 
 def dldb(y, y_predicted):
-    return (2 / len(y)) * np.sum(y_predicted - y)
+    return (1 / len(y)) * np.sum(y_predicted - y)
 
 # Training loop
 for i in range(10000):
