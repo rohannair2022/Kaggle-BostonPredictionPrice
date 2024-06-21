@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from pre_proccess_script import data_preprocess
 
 # Preprocess the data
@@ -13,41 +14,58 @@ dependant = dataFrame[columns_to_include].values
 target = dataFrame['SalePrice'].values
 
 # Initialize weight vector and other parameters
-weight_vector = np.random.randn(dependant.shape[1])
+weight_vector = np.zeros(dependant.shape[1])
 intercept = 0
-learning_rate = 0.001
+alpha = 0.001
+
 
 # Define loss function
 def loss(y, y_predicted):
-    return np.mean((y - y_predicted) ** 2)
+    return np.mean((y - y_predicted) ** 2) / 2
+
 
 # Define function to predict y
 def predicted_y(weight, x, intercept):
     return np.dot(x, weight) + intercept
 
+
 # Define gradients
 def dldw(x, y, y_predicted):
     return (1 / len(y)) * np.dot(x.T, (y_predicted - y))
 
+
 def dldb(y, y_predicted):
     return (1 / len(y)) * np.sum(y_predicted - y)
 
+
 # Training loop
+losses = []
+
 for i in range(10000):
     y_predicted = predicted_y(weight_vector, dependant, intercept)
-    weight_vector -= learning_rate * dldw(dependant, target, y_predicted)
-    intercept -= learning_rate * dldb(target, y_predicted)
+    weight_vector -= alpha * dldw(dependant, target, y_predicted)
+    intercept -= alpha * dldb(target, y_predicted)
+
+    current_loss = loss(target, y_predicted)
+    losses.append(current_loss)
 
     # Optionally, print the loss every few iterations
     if i % 10 == 0:
-        current_loss = loss(target, y_predicted)
         print(f"Iteration {i}: Loss = {current_loss}")
 
-print("Training complete.")
-print("Final weights:", weight_vector)
-print("Final intercept:", intercept)
+# Plotting the loss over iterations
+plt.figure(figsize=(10, 6))
+plt.plot(losses, label='Loss over iterations')
+plt.xlabel('Iteration')
+plt.ylabel('Loss')
+plt.title('Gradient Descent Loss Curve')
+plt.legend()
+plt.grid(True)
+plt.show()
 
 # Load and preprocess the test data
+test_Data = pd.read_csv('Dataset/test.csv')
+
 test_data_initial = data_preprocess(pd.read_csv('Dataset/test.csv'))
 
 # Ensure the test data has the same columns as the training data
@@ -69,7 +87,6 @@ predictions_df = pd.DataFrame({
     'Id': test_data_initial['Id'],
     'SalePrice': test_predictions
 })
-
 
 # Save the predictions to a CSV file
 predictions_df.to_csv('predictions.csv', index=False)
